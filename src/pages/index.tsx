@@ -1,14 +1,8 @@
 import { useMagicSigner } from "@/hooks/useMagicSigner";
 import {
-  ReactNode,
-  createContext,
   useCallback,
-  useContext,
-  useEffect,
   useState,
 } from "react";
-import { Address } from "viem";
-
 
 const Home = () => {
   const [email, setEmail] = useState<string>("");
@@ -30,6 +24,7 @@ const Home = () => {
 
       const didToken = await magic.auth.loginWithEmailOTP({
         email,
+        showUI: true,
       });
       const metadata = await magic.user.getMetadata();
       if (!didToken || !metadata.publicAddress || !metadata.email) {
@@ -37,8 +32,6 @@ const Home = () => {
       }
       console.log(metadata)
       setPublicWalletAddress(metadata.publicAddress);
-      
-      // console.log(isLoggedIn);
 
       setLoggedIn(await magic.user.isLoggedIn());
     },
@@ -63,10 +56,38 @@ const Home = () => {
     <h3 className="font-bold text-lg">Enter your email!</h3>
   
     <div><input placeholder="email" onChange={onEmailChange}/></div>
-    <div><button onClick={login}>Login</button></div>
-    <div><button onClick={logout}>Logout</button></div>
-    {loggedIn ? <div><div>You are logged in</div><div>Your magic wallet adderss is {publicWalletAddress}</div></div> : <div>You are logged out</div>}
+    {loggedIn ?  
+    <div>
+      <div>
+        <button onClick={logout}>Logout</button>
+      </div>
+      <div>You are logged in</div>
+      <div>Your magic wallet adderss is {publicWalletAddress}</div>
+    </div> : 
+    <div>
+      <div>
+        <button onClick={login}>Login</button>
+      </div>
+      <div>You are logged out</div>
+    </div>}
   </div>)
 }
 
 export default Home;
+
+// import { MagicSigner } from "@alchemy/aa-signers";
+
+// // this is generated from the [Magic Dashboard](https://dashboard.magic.link/)
+// const MAGIC_API_KEY = "pk_test_...";
+
+// export const createMagicSigner = async () => {
+//   const magicSigner = new MagicSigner({ apiKey: MAGIC_API_KEY });
+
+//   await magicSigner.authenticate({
+//     authenticate: async () => {
+//       await magicSigner.inner.wallet.connectWithUI();
+//     },
+//   });
+
+//   return magicSigner;
+// };
