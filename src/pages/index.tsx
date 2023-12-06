@@ -1,5 +1,5 @@
 import { useMagicSigner } from "@/hooks/useMagicSigner";
-import { RPCError, RPCErrorCode } from "magic-sdk";
+import { MagicUserMetadata, RPCError, RPCErrorCode } from "magic-sdk";
 import { chain, alchemyApiKey } from "@/config/client";
 import {
   useCallback,
@@ -16,6 +16,7 @@ import {
 } from "@alchemy/aa-core";
 import { Alchemy, BigNumber, Network } from "alchemy-sdk";
 import { getRpcUrl } from "@/config/rpc";
+import Head from "next/head";
 
 const Home = () => {
   const [email, setEmail] = useState<string>("");
@@ -47,6 +48,7 @@ const Home = () => {
       if (!magic || !magic.user || !signer) {
         throw new Error("Magic not initialized");
       }
+
       let didToken: any;
       try{
         didToken = await magic.auth.loginWithEmailOTP({
@@ -61,10 +63,17 @@ const Home = () => {
         }
       }
 
-      const metadata = await magic.user.getMetadata();
+      const metadata: MagicUserMetadata = await magic.user.getMetadata().catch((error) => {
+        if(error instanceof RPCError) {
+          switch (error.code) {
+            case RPCErrorCode.InternalError:
+              return;
+          }
+        }
+      });
 
       if (!didToken || !metadata.publicAddress || !metadata.email) {
-        throw new Error("Magic login failed");
+        return;
       }
       
       setOwnerAddress(metadata.publicAddress as Address);
@@ -105,6 +114,9 @@ const Home = () => {
 
   return (
   <div className="ml-4">
+    <Head>
+      <title>AA Dapp</title>
+    </Head>
     {loggedIn ?  
     <div>
       <div>
