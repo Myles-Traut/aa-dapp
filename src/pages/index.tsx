@@ -14,6 +14,7 @@ import {
   Address,
   getDefaultEntryPointAddress, 
 } from "@alchemy/aa-core";
+import { Alchemy, BigNumber, Network } from "alchemy-sdk";
 import { getRpcUrl } from "@/config/rpc";
 
 const Home = () => {
@@ -21,6 +22,12 @@ const Home = () => {
   const [loggedIn, setLoggedIn] = useState<boolean>(false);
   const [ownerAddress, setOwnerAddress] = useState<Address>();
   const [scaAddress, setScaAddress] = useState<Address>();
+  const [bal, setBal] = useState<BigNumber>();
+  
+  const alchemy = new Alchemy({
+    network: Network.ETH_GOERLI,
+    apiKey: alchemyApiKey,
+  });
   const [provider, setProvider] = useState<AlchemyProvider>(
     new AlchemyProvider({
       chain,
@@ -78,6 +85,7 @@ const Home = () => {
       );
       setProvider(provider);
       setScaAddress(await provider.getAddress());
+      setBal(await alchemy.core.getBalance(provider.getAddress()));
     },
     [magic, signer]
   );
@@ -105,6 +113,7 @@ const Home = () => {
       <div>You are logged in</div>
       <div>Your magic wallet adderss is {ownerAddress}</div>
       <div>Your smart account adderss is {scaAddress}</div>
+      <div>Your smart account balance is {bal?.toString()} ETH</div>
     </div> : 
     <div>
       <h3 className="font-bold text-lg">Enter your email!</h3>
